@@ -47,22 +47,7 @@ uint16_t cot[8]= {ENM0_Pin,ENM1_Pin,ENM2_Pin,ENM3_Pin,ENM4_Pin,ENM5_Pin,ENM6_Pin
 uint16_t hang[8]= {ROW0_Pin,ROW1_Pin,ROW2_Pin,ROW3_Pin,ROW4_Pin,ROW5_Pin,ROW6_Pin,ROW7_Pin};
 const int MAX_LED_MATRIX = 8;
 int index_led_matrix = 0;
-uint8_t matrix_buffer[16][8] = {{ 0xF8,0xFC,0x36,0x33,0x33,0x36,0xFC,0xF8},
-								{ 0x00,0xF8,0xFC,0x36,0x33,0x33,0x36,0xFC},
-								{ 0x00,0x00,0xF8,0xFC,0x36,0x33,0x33,0x36},
-								{ 0x00,0x00,0x00,0xF8,0xFC,0x36,0x33,0x33},
-								{ 0x00,0x00,0x00,0x00,0xF8,0xFC,0x36,0x33},
-								{ 0x00,0x00,0x00,0x00,0x00,0xF8,0xFC,0x36},
-								{ 0x00,0x00,0x00,0x00,0x00,0x00,0xF8,0xFC},
-								{ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xF8},
-								{ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
-								{ 0xF8,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
-								{ 0xFC,0xF8,0x00,0x00,0x00,0x00,0x00,0x00},
-								{ 0x36,0xFC,0xF8,0x00,0x00,0x00,0x00,0x00},
-								{ 0x33,0x36,0xFC,0xF8,0x00,0x00,0x00,0x00},
-								{ 0x33,0x33,0x36,0xFC,0xF8,0x00,0x00,0x00},
-								{ 0x36,0x33,0x33,0x36,0xFC,0xF8,0x00,0x00},
-								{ 0xFC,0x36,0x33,0x33,0x36,0xFC,0xF8,0x00}};
+uint8_t matrix_buffer[8] = { 0xF8,0xFC,0x36,0x33,0x33,0x36,0xFC,0xF8};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -70,7 +55,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
-void updateLEDMatrix(int index1,int index2);
+void updateLEDMatrix(int index);
 void writeByte(uint16_t* pins, uint8_t byte, GPIO_TypeDef* port);
 /* USER CODE END PFP */
 
@@ -115,24 +100,20 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   setTimer1(100);
-  setTimer2(1000);
-  updateLEDMatrix(0,7);
+  updateLEDMatrix(7);
   int index_led = 0;
-  int status_trans = 0;
   while (1)
   {
 	  if (timer1_flag == 1){
-		  setTimer1(10);
-		  updateLEDMatrix(status_trans,index_led++);
-		  if (index_led >=8){
-			  index_led = 0;
+		  updateLEDMatrix(index_led++);
+		  if (index_led == 8){
+			  setTimer1(10);
 		  }
-	  }
-	  if (timer2_flag == 1){
-		  setTimer2(100);
-		  status_trans++;
-		  if (status_trans >=16){
-			  status_trans = 0;
+		  else if (index_led < 8){
+			  setTimer1(5);
+		  }
+		  if ( index_led >= 8 ){
+			  index_led = 0;
 		  }
 	  }
     /* USER CODE END WHILE */
@@ -289,39 +270,39 @@ void writeByte(uint16_t* pins, uint8_t byte, GPIO_TypeDef* port){
 	HAL_GPIO_WritePin(port, pins[6], byte & (uint8_t)0x40);
 	HAL_GPIO_WritePin(port, pins[7], byte & (uint8_t)0x80);
 }
-void updateLEDMatrix(int index1, int index2){
-	switch (index2){
+void updateLEDMatrix(int index){
+	switch (index){
 	case 0:
 		writeByte(cot, ~0X01, ENM0_GPIO_Port);
-		writeByte(hang, ~matrix_buffer[index1][index2], ROW0_GPIO_Port);
+		writeByte(hang, ~matrix_buffer[index], ROW0_GPIO_Port);
 		break;
 	case 1:
 		writeByte(cot, ~0X02, ENM0_GPIO_Port);
-		writeByte(hang, ~matrix_buffer[index1][index2], ROW0_GPIO_Port);
+		writeByte(hang, ~matrix_buffer[index], ROW0_GPIO_Port);
 		break;
 	case 2:
 		writeByte(cot, ~0X04, ENM0_GPIO_Port);
-		writeByte(hang, ~matrix_buffer[index1][index2], ROW0_GPIO_Port);
+		writeByte(hang, ~matrix_buffer[index], ROW0_GPIO_Port);
 		break;
 	case 3:
 		writeByte(cot, ~0X08, ENM0_GPIO_Port);
-		writeByte(hang, ~matrix_buffer[index1][index2], ROW0_GPIO_Port);
+		writeByte(hang, ~matrix_buffer[index], ROW0_GPIO_Port);
 		break;
 	case 4:
 		writeByte(cot, ~0X10, ENM0_GPIO_Port);
-		writeByte(hang, ~matrix_buffer[index1][index2], ROW0_GPIO_Port);
+		writeByte(hang, ~matrix_buffer[index], ROW0_GPIO_Port);
 		break;
 	case 5:
 		writeByte(cot, ~0X20, ENM0_GPIO_Port);
-		writeByte(hang, ~matrix_buffer[index1][index2], ROW0_GPIO_Port);
+		writeByte(hang, ~matrix_buffer[index], ROW0_GPIO_Port);
 		break;
 	case 6:
 		writeByte(cot, ~0X40, ENM0_GPIO_Port);
-		writeByte(hang, ~matrix_buffer[index1][index2], ROW0_GPIO_Port);
+		writeByte(hang, ~matrix_buffer[index], ROW0_GPIO_Port);
 		break;
 	case 7:
 		writeByte(cot, (uint8_t)~0X80, ENM0_GPIO_Port);
-		writeByte(hang, ~matrix_buffer[index1][index2], ROW0_GPIO_Port);
+		writeByte(hang, ~matrix_buffer[index], ROW0_GPIO_Port);
 		break;
 	default:
 		break;
